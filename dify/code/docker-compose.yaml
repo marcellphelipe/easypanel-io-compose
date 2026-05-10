@@ -499,7 +499,7 @@ x-shared-env: &shared-api-worker-env
 services:
   # API service
   api:
-    image: langgenius/dify-api:1.4.0
+    image: langgenius/dify-api:1.13.3
     restart: always
     environment:
       # Use the shared environment variables.
@@ -518,6 +518,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      plugin_daemon:
+        condition: service_started
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
@@ -528,7 +530,7 @@ services:
   # worker service
   # The Celery worker for processing the queue.
   worker:
-    image: langgenius/dify-api:1.4.0
+    image: langgenius/dify-api:1.13.3
     restart: always
     environment:
       # Use the shared environment variables.
@@ -545,6 +547,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      plugin_daemon:
+        condition: service_started
     volumes:
       # Mount the storage directory to the container, for storing user files.
       - ./volumes/app/storage:/app/api/storage
@@ -554,7 +558,7 @@ services:
 
   # Frontend web application.
   web:
-    image: langgenius/dify-web:1.4.0
+    image: langgenius/dify-web:1.13.3
     restart: always
     environment:
       CONSOLE_API_URL: ${CONSOLE_API_URL:-}
@@ -625,7 +629,7 @@ services:
 
   # The DifySandbox
   sandbox:
-    image: langgenius/dify-sandbox:0.2.12
+    image: langgenius/dify-sandbox:0.2.15
     restart: always
     environment:
       # The DifySandbox configurations
@@ -649,7 +653,9 @@ services:
 
   # plugin daemon
   plugin_daemon:
-    image: langgenius/dify-plugin-daemon:0.0.10-local
+    image: langgenius/dify-plugin-daemon:0.5.9-local
+    #image: langgenius/dify-plugin-daemon:0.5.8-local
+    #image: langgenius/dify-plugin-daemon:0.5.8-local-linux-arm64
     restart: always
     environment:
       # Use the shared environment variables.
@@ -750,6 +756,8 @@ services:
   nginx:
     image: nginx:latest
     restart: always
+    ports:
+      - "8081:80"
     volumes:
       - ./nginx/nginx.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/proxy.conf.template:/etc/nginx/proxy.conf.template
@@ -816,7 +824,7 @@ services:
   # Qdrant vector store.
   # (if used, you need to set VECTOR_STORE to qdrant in the api & worker service.)
   qdrant:
-    image: langgenius/qdrant:v1.7.3
+    image: langgenius/qdrant:v1.8.3
     profiles:
       - qdrant
     restart: always
